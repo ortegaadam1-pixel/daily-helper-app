@@ -1,5 +1,12 @@
 import streamlit as st
-import time
+import os
+
+# This line automatically installs the sound generator so the app doesn't crash
+try:
+    from gtts import gTTS
+except ImportError:
+    os.system('pip install gtts')
+    from gtts import gTTS
 
 # App Configuration
 st.set_page_config(page_title="The Daily Helper", page_icon="🔥", layout="centered")
@@ -9,26 +16,37 @@ st.write("Welcome! Let's explore the power of the Holy Spirit together.")
 
 # --- FEATURE 1: THE LANGUAGE MIXER ---
 st.header("1. The Pentecost Language Mixer")
-st.write("Speak or type a sentence to hear how the Holy Spirit shared the Good News with everyone at Pentecost!")
+st.write("Type a sentence to hear how the Holy Spirit shared the Good News out loud in different languages at Pentecost!")
 
-user_phrase = st.text_input("Type a cool phrase (e.g., 'God loves you and gives you courage!'):", 
-                            placeholder="God loves you!")
+user_phrase = st.text_input("Type a cool phrase (like 'God gives you courage!'):", placeholder="God loves you!")
 
 if st.button("✨ Activate Pentecost Mixer"):
     if user_phrase:
-        st.write("🔊 *Simulating simultaneous Holy Spirit translation...*")
+        st.write("🔊 **The Holy Spirit makes the message heard! Click play below:**")
         
-        # Simulating multimodal translation output
+        # Real translation map for actual spoken audio generation
         translations = {
-            "Spanish 🇪🇸": f"¡Dios te ama! (Translating: '{user_phrase}')",
-            "Swahili 🇰🇪": f"Mungu anakupenda! (Translating: '{user_phrase}')",
-            "German 🇩🇪": f"Gott liebt dich! (Translating: '{user_phrase}')",
-            "Tagalog 🇵🇭": f"Mahal ka ng Diyos! (Translating: '{user_phrase}')"
+            "Spanish 🇪🇸": ("es", "¡Dios te ama! Él te da fuerza."),
+            "Swahili 🇰🇪": ("sw", "Mungu anakupenda! Anakupa nguvu."),
+            "German 🇩🇪": ("de", "Gott liebt dich! Er gibt dir Kraft."),
+            "Tagalog 🇵🇭": ("tl", "Mahal ka ng Dios! Binibigyan ka niya ng lakas.")
         }
         
-        for lang, text in translations.items():
-            time.sleep(0.5)
-            st.success(f"**{lang}:** {text}")
+        for lang_name, (lang_code, translated_text) in translations.items():
+            st.write(f"**{lang_name}:**")
+            
+            # Generating real audio voice files dynamically
+            tts = gTTS(text=translated_text, lang=lang_code, slow=False)
+            filename = f"{lang_code}_audio.mp3"
+            tts.save(filename)
+            
+            # Displaying an actual playable sound bar widget for the kids to listen to
+            with open(filename, "rb") as audio_file:
+                st.audio(audio_file.read(), format="audio/mp3")
+                
+            # Clean up files securely
+            os.remove(filename)
+            
         st.balloons()
     else:
         st.warning("Please type a phrase first!")
@@ -51,7 +69,6 @@ scenario = st.selectbox(
 if scenario != "Select a situation...":
     st.subheader("Your Holy Spirit Gameplan:")
     
-    # Custom AI response generation logic based on 2 Timothy 1:7
     if "playground" in scenario:
         response = "Hey champ! Remember, the Holy Spirit is right there with you by the swings. He gave Peter the bravery to speak to thousands, and He is giving you the power to stand tall right now. You don't have to be afraid!"
     elif "test" in scenario:
